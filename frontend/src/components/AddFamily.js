@@ -1,5 +1,3 @@
-
-
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -103,7 +101,7 @@ function AddFamily() {
         style={{ marginTop: "20px" }}
         onClick={handleLogout} // ✅ simplified
       >
-        Logout
+        Logouts
       </button>
     </div>
   );
