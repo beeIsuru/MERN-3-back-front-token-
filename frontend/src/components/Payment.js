@@ -9,10 +9,21 @@ function Payment() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
+  // Helper to get token from localStorage
+  const getToken = () => localStorage.getItem("token");
+
   // Fetch payments on load
   useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      setMessage("You must be logged in to view payments.");
+      setLoading(false);
+      return;
+    }
     axios
-      .get("http://localhost:5001/user/payment", { withCredentials: true })
+      .get("http://localhost:5001/user/payment", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => {
         setPayments(res.data);
         setLoading(false);
@@ -25,17 +36,22 @@ function Payment() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const token = getToken();
+    if (!token) {
+      setMessage("You must be logged in to add a payment.");
+      return;
+    }
     axios
       .post(
         "http://localhost:5001/user/payment",
         { name, cardNumber, cnn },
-        { withCredentials: true }
+        { headers: { Authorization: `Bearer ${token}` } }
       )
       .then((res) => {
         setMessage(res.data);
         // Refresh payment list
         return axios.get("http://localhost:5001/user/payment", {
-          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
         });
       })
       .then((res) => {

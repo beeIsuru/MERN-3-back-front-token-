@@ -1,14 +1,3 @@
-// const mongoose = require("mongoose");
-
-// const familyMemberSchema = new mongoose.Schema({
-//   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-//   role: String,
-//   name: String,
-//   age: Number,
-//   address: String,
-// });
-
-// module.exports = mongoose.model("FamilyMember", familyMemberSchema);
 
 const mongoose = require("mongoose");
 
