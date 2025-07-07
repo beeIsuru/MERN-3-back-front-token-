@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -8,12 +10,16 @@ function Payment() {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
-  // Helper to get token from localStorage
   const getToken = () => localStorage.getItem("token");
 
-  // Fetch payments on load
   useEffect(() => {
+    fetchPayments();
+    // eslint-disable-next-line
+  }, []);
+
+  const fetchPayments = () => {
     const token = getToken();
     if (!token) {
       setMessage("You must be logged in to view payments.");
@@ -32,43 +38,78 @@ function Payment() {
         console.error("Error fetching payments:", err);
         setLoading(false);
       });
-  }, []);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const token = getToken();
     if (!token) {
-      setMessage("You must be logged in to add a payment.");
+      setMessage("You must be logged in to add or update a payment.");
       return;
     }
-    axios
-      .post(
-        "http://localhost:5001/user/payment",
-        { name, cardNumber, cnn },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then((res) => {
-        setMessage(res.data);
-        // Refresh payment list
-        return axios.get("http://localhost:5001/user/payment", {
-          headers: { Authorization: `Bearer ${token}` },
+    if (editingId) {
+      // Update payment
+      axios
+        .put(
+          `http://localhost:5001/user/payment/${editingId}`,
+          { name, cardNumber, cnn },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        .then((res) => {
+          setMessage(res.data.message);
+          setEditingId(null);
+          setName("");
+          setCardNumber("");
+          setCnn("");
+          fetchPayments();
+        })
+        .catch((err) => {
+          console.error("Error updating payment:", err);
+          setMessage("Error updating payment");
         });
-      })
-      .then((res) => {
-        setPayments(res.data);
-        setName("");
-        setCardNumber("");
-        setCnn("");
-      })
-      .catch((err) => {
-        console.error("Error adding payment:", err);
-        setMessage("Error adding payment");
-      });
+    } else {
+      // Add new payment
+      axios
+        .post(
+          "http://localhost:5001/user/payment",
+          { name, cardNumber, cnn },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        .then((res) => {
+          setMessage(res.data);
+          setName("");
+          setCardNumber("");
+          setCnn("");
+          fetchPayments();
+        })
+        .catch((err) => {
+          console.error("Error adding payment:", err);
+          setMessage("Error adding payment");
+        });
+    }
+  };
+
+  // When user clicks "Edit"
+  const handleEdit = (payment) => {
+    setEditingId(payment._id);
+    setName(payment.name);
+    setCardNumber(payment.cardNumber);
+    setCnn(payment.cnn);
+    setMessage("");
+  };
+
+  // When user cancels editing
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setName("");
+    setCardNumber("");
+    setCnn("");
+    setMessage("");
   };
 
   return (
     <div style={{ padding: "20px", maxWidth: "500px", margin: "0 auto" }}>
-      <h2>Add Payment</h2>
+      <h2>{editingId ? "Update Payment" : "Add Payment"}</h2>
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: "10px" }}
@@ -94,7 +135,18 @@ function Payment() {
           onChange={(e) => setCnn(e.target.value)}
           required
         />
-        <button type="submit">Add Payment</button>
+        <button type="submit">
+          {editingId ? "Update Payment" : "Add Payment"}
+        </button>
+        {editingId && (
+          <button
+            type="button"
+            onClick={handleCancelEdit}
+            style={{ background: "#ccc" }}
+          >
+            Cancel
+          </button>
+        )}
       </form>
 
       {message && <p>{message}</p>}
@@ -117,7 +169,13 @@ function Payment() {
             >
               <strong>{payment.name}</strong> <br />
               Card Number: {payment.cardNumber} <br />
-              CNN: {payment.cnn}
+              CNN: {payment.cnn} <br />
+              <button
+                style={{ marginTop: "5px" }}
+                onClick={() => handleEdit(payment)}
+              >
+                Edit
+              </button>
             </li>
           ))}
         </ul>

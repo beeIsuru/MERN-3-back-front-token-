@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Nav from "../components/Nav/Nav";
 
 function AddFamily() {
   const [form, setForm] = useState({
@@ -59,6 +60,7 @@ function AddFamily() {
 
   return (
     <div>
+            <Nav />
       <form onSubmit={handleSubmit}>
         <h2>Add Family Member</h2>
         <input

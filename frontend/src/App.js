@@ -7,6 +7,7 @@ import AddFamily from "./components/AddFamily";
 import Payment from "./components/Payment";
 import Display from "./components/Display";
 import Weather from "./components/Weather/Weather";
+import FamilyUpdate from "./components/FamilyUpdate";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Route path="/Display" element={<Display />} />
       <Route path="/payment" element={<Payment />} />
       <Route path="/weather" element={<Weather />} />
+      <Route path="/updateFamily/:id" element={<FamilyUpdate />} />
     </Routes>
   );
 }

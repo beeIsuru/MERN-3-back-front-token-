@@ -53,3 +53,49 @@ exports.getFamily = async (req, res) => {
       .json({ message: "Error fetching family", error: err.message }); // ✅
   }
 };
+
+// Update a family member
+exports.updateFamily = async (req, res) => {
+  try {
+    const familyId = req.params.id;
+    const { role, name, age, address } = req.body;
+
+    const updated = await FamilyMember.findOneAndUpdate(
+      { _id: familyId, userId: req.userId },
+      { role, name, age: Number(age), address },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Family member not found or unauthorized" });
+    }
+
+    res.json({
+      message: "Family member updated successfully",
+      familyMember: updated,
+    });
+  } catch (err) {
+    console.error("Error updating family member:", err);
+    res.status(500).json({ message: "Error updating family member", error: err.message });
+  }
+};
+
+// Delete a family member
+exports.deleteFamily = async (req, res) => {
+  try {
+    const familyId = req.params.id;
+    const deleted = await FamilyMember.findOneAndDelete({
+      _id: familyId,
+      userId: req.userId,
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Family member not found or unauthorized" });
+    }
+
+    res.json({ message: "Family member deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting family member:", err);
+    res.status(500).json({ message: "Error deleting family member", error: err.message });
+  }
+};
